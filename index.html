@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sales Performance Dashboard</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -251,6 +250,9 @@
         <div class="header">
             <h1>Sales Performance Dashboard</h1>
             <p>Interactive analytics for strategic decision making</p>
+            <div id="loadingStatus" style="margin-top: 10px; padding: 10px; background: #f0f8ff; border-radius: 5px; display: block;">
+                🔄 Loading dashboard...
+            </div>
         </div>
 
         <div class="kpi-grid" id="kpiGrid">
@@ -377,6 +379,9 @@
         </div>
     </div>
 
+    <!-- Load Chart.js first -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    
     <script>
         // Global variables
         let salesData = [];
@@ -889,21 +894,54 @@
         // Initialize dashboard
         function initDashboard() {
             try {
+                console.log('Starting dashboard initialization...');
+                
+                // Check if Chart.js is loaded
+                if (typeof Chart === 'undefined') {
+                    throw new Error('Chart.js library not loaded');
+                }
+                console.log('Chart.js is available');
+                
                 // Parse the CSV data
+                console.log('Parsing CSV data...');
                 salesData = parseCSV(csvData);
                 filteredData = [...salesData];
+                console.log('Parsed', salesData.length, 'records');
                 
                 // Populate filters
+                console.log('Populating filters...');
                 populateFilters();
                 
                 // Initial dashboard update
+                console.log('Updating dashboard...');
                 updateDashboard();
                 
                 console.log('Dashboard initialized successfully with', salesData.length, 'records');
+                
+                // Hide loading indicator and show success
+                const loadingStatus = document.getElementById('loadingStatus');
+                if (loadingStatus) {
+                    loadingStatus.innerHTML = '✅ Dashboard loaded successfully!';
+                    loadingStatus.style.background = '#e6ffed';
+                    setTimeout(() => {
+                        loadingStatus.style.display = 'none';
+                    }, 2000);
+                }
+                
             } catch (error) {
                 console.error('Error initializing dashboard:', error);
+                
                 // Show error message to user
-                document.querySelector('.loading').textContent = 'Error loading data. Please refresh the page.';
+                const loadingStatus = document.getElementById('loadingStatus');
+                if (loadingStatus) {
+                    loadingStatus.innerHTML = '❌ Error loading dashboard: ' + error.message;
+                    loadingStatus.style.background = '#ffebee';
+                }
+                
+                const loadingElement = document.querySelector('.loading');
+                if (loadingElement) {
+                    loadingElement.textContent = 'Error loading data: ' + error.message;
+                }
             }
         }
 
